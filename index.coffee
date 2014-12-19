@@ -126,8 +126,8 @@ class VirtDBConnector
         protocol_call name, 'tcp://' + @IP + ':*', callback, @OnBound
         return
 
-    @OnBound = (name, socket, svcType, zmqType) ->
-        return (err) ->
+    @OnBound: (name, socket, svcType, zmqType) =>
+        return (err) =>
             if err
                 log.error "Error during binding socket: " + err
                 return
