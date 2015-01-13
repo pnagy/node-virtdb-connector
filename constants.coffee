@@ -30,4 +30,5 @@ class Constants
 
     @SERVER_CONFIG_TYPE = "42"
 
+
 module.exports = Constants
