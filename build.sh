@@ -7,7 +7,7 @@ if [ "X" == "X$GITHUB_PASSWORD" ]; then echo "Need GITHUB_PASSWORD environment v
 if [ "X" == "X$GITHUB_EMAIL" ]; then echo "Need GITHUB_EMAIL environment variable"; exit 10; fi
 if [ "X" == "X$HOME" ]; then echo "Need HOME environment variable"; exit 10; fi
 
-cd $HOME
+cd build-result
 
 git clone --recursive https://$GITHUB_USER:$GITHUB_PASSWORD@github.com/starschema/$PACKAGE.git $PACKAGE
 if [ $? -ne 0 ]; then echo "Failed to clone $PACKAGE repository"; exit 10; fi
