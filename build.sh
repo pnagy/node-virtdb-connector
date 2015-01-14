@@ -22,7 +22,7 @@ echo login $GITHUB_USER >>$HOME/.netrc
 echo password $GITHUB_PASSWORD >>$HOME/.netrc
 echo >>$HOME/.netrc
 
-cd $HOME/$PACKAGE
+cd $HOME/build-result/$PACKAGE
 
 git --version
 git config --global push.default simple
