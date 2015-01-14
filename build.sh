@@ -24,6 +24,9 @@ echo >>$HOME/.netrc
 
 cd $HOME/build-result/$PACKAGE
 
+PROTOC_PATH=$(which protoc)
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:${PROTOC_PATH%/bin/protoc}/lib/pkgconfig
+
 git --version
 git config --global push.default simple
 git config --global user.name $GITHUB_USER
