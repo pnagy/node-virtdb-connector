@@ -2,17 +2,32 @@ var gulp = require('gulp');
 var coffee = require('gulp-coffee');
 var spawn = require('child_process').spawn;
 var sourcemaps = require('gulp-sourcemaps');
-var gulp = require('gulp');
-var coffee = require('gulp-coffee');
-var spawn = require('child_process').spawn;
-var sourcemaps = require('gulp-sourcemaps');
 var mocha = require('gulp-mocha');
 require('coffee-script/register')
-var gulp = require("gulp");
-var coffee = require("gulp-coffee");
-var spawn = require("child_process").spawn;
-var sourcemaps = require("gulp-sourcemaps");
-var node;
+var debug = require('gulp-debug');
+var istanbul = require('gulp-coffee-istanbul');
+
+var jsFiles = [];
+var coffeeFiles = ['*.coffee'];
+var specFiles = ['test/*.coffee'];
+
+gulp.task('coverage', function() {
+  gulp.src(jsFiles.concat(coffeeFiles))
+      .pipe(istanbul({
+                includeUntested: true
+            }))
+      .pipe(istanbul.hookRequire())
+      .on('finish', function() {
+          gulp.src(specFiles)
+            .pipe(mocha({
+              reporter: 'spec'
+            }))
+            .pipe(istanbul.writeReports({
+                dir: '.',
+                reporters: ['cobertura']
+            }));
+        });
+});
 
 /**
  * $ gulp server
