@@ -61,7 +61,7 @@ function release {
 echo "Building $PACKAGE"
 npm install
 if [ $? -ne 0 ]; then echo "npm install"; exit 10; fi
-npm test
+mocha --compilers=coffee:coffee-script/register test/*.coffee --reporter=XUnit
 if [ $? -ne 0 ]; then echo "npm test"; exit 10; fi
 
 [[ $RELEASE == true ]] && release || echo "non-release"
