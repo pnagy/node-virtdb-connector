@@ -9,6 +9,9 @@ if [ "X" == "X$HOME" ]; then echo "Need HOME environment variable"; exit 10; fi
 
 cd build-result
 
+rm -rf $PACKAGE/*
+rm -rf $PACKAGE/.*
+
 git clone --recursive https://$GITHUB_USER:$GITHUB_PASSWORD@github.com/starschema/$PACKAGE.git $PACKAGE
 if [ $? -ne 0 ]; then echo "Failed to clone $PACKAGE repository"; exit 10; fi
 echo Creating build $BUILDNO
