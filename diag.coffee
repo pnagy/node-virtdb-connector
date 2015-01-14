@@ -1,13 +1,6 @@
 cliOptions = require('nomnom').parse()
 Protocol = require './protocol'
 os = require 'os'
-util = require 'util'
-
-class Variable
-    constructor: (@content) ->
-
-    toString: () ->
-        util.inspect @content, {depth: null}
 
 Date::yyyymmdd = () ->
     yyyy = @getFullYear().toString()
@@ -20,9 +13,6 @@ Date::hhmmss = () ->
     mm = ('0'+@getMinutes().toString()).slice(-2)
     ss = ('0'+@getSeconds().toString()).slice(-2)
     hh + mm + ss
-
-String::startsWith = (other) ->
-    @substring(0, other.length) == other
 
 Object.defineProperty global, "__stack",
     get: ->
@@ -60,6 +50,7 @@ class Diag
     @_newSymbols = []
     @_headers = {}
     @_newHeaders = []
+    @_isConsoleLogEnabled = false
 
     @startDate: =>
         if not @_startDate?
@@ -194,7 +185,13 @@ class Diag
         ellapsed = process.hrtime(@_startHR)
         return (ellapsed[0] * 1e9 + ellapsed[1]) / 1000
 
-    @_log: (level, args) =>
+    @_createConsoleLogMessage: (args) =>
+        message = ""
+        argTexts = args.map (val) ->
+            val.toString()
+        return argTexts.join " "
+
+    @_createDiagServiceMessage: (level, args) =>
         record = {}
         record.Process = @_getProcessInfo()
         record.Data = [
@@ -211,51 +208,12 @@ class Diag
 
         record.Symbols = @_getNewSymbols()
         record.Headers = @_getNewHeaders()
-
-        Protocol.sendDiag record
-
-class Log
-    @levels =
-        SILENT: 'silent'
-        TRACE: 'trace'
-        DEBUG: 'debug'
-        INFO: 'info'
-        WARN: 'warn'
-        ERROR: 'error'
-
-    @level = 'trace'
-
-    @trace: (args...) ->
-        if @level in ['trace']
-            Diag._log 'VIRTDB_SIMPLE_TRACE', args
-
-    @debug: (args...) ->
-        if @level in ['trace', 'debug']
-            Diag._log 'VIRTDB_SIMPLE_TRACE', args
-
-    @info: (args...) ->
-        if @level in ['trace', 'debug', 'info']
-            Diag._log 'VIRTDB_INFO', args
-
-    @warn: (args...) ->
-        if @level in ['trace', 'debug', 'info', 'warn']
-            Diag._log 'VIRTDB_INFO', args
-
-    @error: (args...) ->
-        if @level in ['trace', 'debug', 'info', 'warn', 'error']
-            Diag._log 'VIRTDB_ERROR', args
-
-    @setLevel: (level) =>
-        @level = level.toLowerCase?()
-
-    @enableAll: () =>
-        @setLevel @levels.TRACE
-
-    @disableAll: () =>
-        @setLevel @levels.SILENT
-
-    @Variable = (param) ->
-        new Variable(param)
+        return record
 
 
-module.exports = Log
+    @_log: (level, args) =>
+        record = @_createDiagServiceMessage level, args
+        if not Protocol.sendDiag record or Diag._isConsoleLogEnabled
+            console.error level + ": " + @_createConsoleLogMessage args
+
+module.exports = Diag

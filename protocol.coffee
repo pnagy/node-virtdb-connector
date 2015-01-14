@@ -37,26 +37,13 @@ class Protocol
                 zmqAddress = socket.getsockopt zmq.ZMQ_LAST_ENDPOINT
             onBound err, svcType, zmqType, zmqAddress
 
-    @onDiagSocket = (callback) =>
-        if @diag_socket?
-            callback()
-        else
-            async.retry 5, (retry_callback, results) =>
-                setTimeout =>
-                    err = null
-                    # log.debug @diag_socket
-                    if not @diag_socket?
-                        err = "diag_socket is not set yet"
-                    retry_callback err, @diag_socket
-                , 50
-            , =>
-                if @diag_socket?
-                    callback()
-
     @sendDiag = (logRecord) =>
-        @onDiagSocket () =>
-            # log.debug logRecord
+        try
             @diag_socket.send proto_diag.serialize logRecord, "virtdb.interface.pb.LogRecord"
+        catch ex
+            console.error "Couldn't send log message: ", ex
+            return false
+        return true
 
     @connectToDiag = (addresses) =>
         ret = null
