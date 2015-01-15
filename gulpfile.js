@@ -4,7 +4,6 @@ var spawn = require('child_process').spawn;
 var sourcemaps = require('gulp-sourcemaps');
 var mocha = require('gulp-mocha');
 require('coffee-script/register')
-var debug = require('gulp-debug');
 var istanbul = require('gulp-coffee-istanbul');
 
 var jsFiles = [];
