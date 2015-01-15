@@ -62,6 +62,7 @@ echo "Building $PACKAGE"
 npm install
 if [ $? -ne 0 ]; then echo "npm install"; exit 10; fi
 node_modules/mocha/bin/mocha --compilers=coffee:coffee-script/register test/*.coffee --reporter=tap > test-report.xml
+node_modules/gulp/bin/gulp.js coverage
 if [ $? -ne 0 ]; then echo "npm test"; exit 10; fi
 
 [[ $RELEASE == true ]] && release || echo "non-release"
