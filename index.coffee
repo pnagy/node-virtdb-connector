@@ -14,9 +14,10 @@ class VirtDBConnector
     @Sockets = {}
     @Convert = Convert
     @handler = null
+    @callbacks = []
 
     @connect: (name, connectionString) =>
-        @handler = new Protocol.EndpointHandler connectionString, @onEndpoint
+        @handler = new Protocol.EndpointHandler connectionString, @_onEndpoint
 
         endpoint =
             Endpoints: [
@@ -27,6 +28,11 @@ class VirtDBConnector
 
     @close: =>
         @handler?.close()
+        @IP = null
+        @Handlers = {}
+        @Sockets = {}
+        @handler = null
+        @callbacks = []
 
     @onAddress: (service_type, connection_type, callback) =>
         @Handlers[service_type] ?= {}
@@ -50,7 +56,18 @@ class VirtDBConnector
             if connection_type == 'PUB_SUB' and channel?
                 socket.subscribe channel
 
-    @onEndpoint: (endpoint) =>
+    @onIP: (callback) =>
+        if @IP?
+            console.log "Our IP:", @IP
+            callback()
+        else
+            @callbacks.push callback
+
+    @setupEndpoint: (name, protocol_call, callback) =>
+        protocol_call name, 'tcp://' + @IP + ':*', callback, @_OnBound
+        return
+
+    @_onEndpoint: (endpoint) =>
         switch endpoint.SvcType
             when 'IP_DISCOVERY'
                 if not @IP?
@@ -87,6 +104,9 @@ class VirtDBConnector
 
             client?.on 'message', (message, remote) =>
                 @IP = message.toString()
+                for callback in @callbacks
+                    callback()
+                @callbacks = []
                 client.close()
 
 
@@ -103,30 +123,7 @@ class VirtDBConnector
             , ->
                 return
 
-    @onIP: (callback) =>
-        if @IP?
-            console.log "Our IP:", @IP
-            callback()
-        else
-            async.retry 5, (retry_callback, results) =>
-                setTimeout =>
-                    err = null
-                    if not @IP?
-                        err = "IP is not set yet"
-                    retry_callback err, @IP
-                , 50
-            , =>
-                if @IP?
-                    console.log "Our IP:", @IP
-                    callback()
-                else
-                    throw "Unable to detect own IP."
-
-    @setupEndpoint: (name, protocol_call, callback) =>
-        protocol_call name, 'tcp://' + @IP + ':*', callback, @OnBound
-        return
-
-    @OnBound: (name, socket, svcType, zmqType) =>
+    @_OnBound: (name, socket, svcType, zmqType) =>
         return (err) =>
             if err
                 log.error "Error during binding socket: " + err

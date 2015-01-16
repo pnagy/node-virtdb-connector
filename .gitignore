@@ -1,4 +1,6 @@
 *.js.map
 node_modules
 tags
+
+# test report
 cobertura-coverage.xml

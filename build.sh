@@ -61,8 +61,12 @@ function release {
 echo "Building $PACKAGE"
 npm install
 if [ $? -ne 0 ]; then echo "npm install"; exit 10; fi
+node_modules/gulp/bin/gulp.js coffee
 node_modules/mocha/bin/mocha --compilers=coffee:coffee-script/register test/*.coffee --reporter=tap > test-report.xml
 node_modules/gulp/bin/gulp.js coverage
 if [ $? -ne 0 ]; then echo "Tests failed"; exit 10; fi
+git add lib/*.js
+git commit -m"Adding built javascript files."
+git push origin master
 
 [[ $RELEASE == true ]] && release || echo "non-release"
