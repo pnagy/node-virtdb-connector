@@ -151,3 +151,42 @@ describe "Diag _createConsoleLogMessage", ->
         MSG_COMP = OBJ1 + " " + MSG1
         consoleMessage = Diag._createConsoleLogMessage [obj1, MSG1]
         consoleMessage.should.be.deep.equal MSG_COMP
+
+
+describe "Diag _createDiagServiceMessage", ->
+    sandbox = null
+
+    beforeEach =>
+        sandbox = sinon.sandbox.create()
+
+    afterEach =>
+        sandbox.restore()
+
+    it "should display simple text message", ->
+        text = "MSG1"
+
+        message = Diag._createDiagServiceMessage 'VIRTDB_SIMPLE_TRACE', [text]
+        message.Process.StartDate.should.be.greaterThan('20150101')
+        message.Process.StartDate.should.be.lessThan('21150101')
+        message.Process.StartTime.should.be.greaterThan('000000')
+        message.Process.StartTime.should.be.lessThan('235959')
+        message.Process.Pid.should.be.greaterThan(0)
+        message.Process.Random.should.be.greaterThan(0)
+        message.Process.NameSymbol.should.be.lessThan(10)
+        message.Process.HostSymbol.should.be.lessThan(10)
+        message.Data.length.should.equal(1)
+        message.Data[0].HeaderSeqNo.should.be.lessThan(10)
+        message.Data[0].ThreadId.should.equal(0)
+        message.Data[0].Values.length.should.equal(0)
+        message.Symbols.length.should.equal(5)
+        message.Symbols[4].Value.should.equal(text)
+        message.Headers[0].SeqNo.should.equal(0)
+        message.Headers[0].FileNameSymbol.should.equal(2)
+        message.Headers[0].FunctionNameSymbol.should.equal(3)
+        message.Headers[0].Level.should.equal('VIRTDB_SIMPLE_TRACE')
+        message.Headers[0].LogStringSymbol.should.equal(0)
+        message.Headers[0].Parts.length.should.equal(1)
+        message.Headers[0].Parts[0].HasData.should.equal(false)
+        message.Headers[0].Parts[0].IsVariable.should.equal(false)
+        message.Headers[0].Parts[0].PartSymbol.should.equal(4)
+        message.Headers[0].Parts[0].Type.should.equal('STRING')
