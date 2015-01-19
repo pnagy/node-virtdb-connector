@@ -18,6 +18,9 @@ class Log
 
     @level = 'trace'
 
+    @setComponentName: (name) ->
+        Diag.componentName = name
+
     @trace: (args...) ->
         if @level in ['trace']
             Diag._log 'VIRTDB_SIMPLE_TRACE', args
@@ -48,7 +51,7 @@ class Log
         @setLevel @levels.SILENT
 
     @enableConsoleLog: (isEnabled) =>
-        Diag._isConsoleLogEnabled = isEnabled
+        Diag.isConsoleLogEnabled = isEnabled
 
     @Variable = (param) ->
         new Variable(param)
