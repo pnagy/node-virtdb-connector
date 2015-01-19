@@ -72,12 +72,14 @@ describe "VirtDBConnector", ->
             ]
         endpointSerialized = proto_service_config.serialize endpoint ,'virtdb.interface.pb.Endpoint'
         req_socket.send.should.have.been.calledWith endpointSerialized
-        VirtDBConnector.componentName.should.be.deep.equal NAME
 
-    it "should save the name of the component", ->
+    it "should set the name of the component to the log", ->
         NAME = "node-connector-test"
+        setCompNameStub = sandbox.stub VirtDBConnector.log, "setComponentName"
+
         VirtDBConnector.connect NAME, "localhost"
-        VirtDBConnector.componentName.should.be.deep.equal NAME
+        setCompNameStub.should.have.been.calledOnce
+        setCompNameStub.should.have.been.calledWithExactly NAME
 
     detectIP = (done) ->
         message =
