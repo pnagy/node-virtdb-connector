@@ -1,5 +1,5 @@
-cliOptions = require('nomnom').parse()
 Protocol = require './protocol'
+VirtDbConnector = require "./index"
 os = require 'os'
 
 Date::yyyymmdd = () ->
@@ -68,7 +68,7 @@ class Diag
         @_random
 
     @process_name: =>
-        @_name ?= cliOptions.name
+        @_name ?= VirtDbConnector.componentName
         return @_name
 
     @_getProcessInfo: () =>

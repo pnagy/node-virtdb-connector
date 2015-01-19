@@ -14,9 +14,11 @@ class VirtDBConnector
     @Convert = Convert
     @handler = null
     @callbacks = []
+    @componentName = null
 
     @connect: (name, connectionString) =>
         @handler = new Protocol.EndpointHandler connectionString, @_onEndpoint
+        @componentName = name
 
         endpoint =
             Endpoints: [

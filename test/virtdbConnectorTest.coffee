@@ -62,7 +62,8 @@ describe "VirtDBConnector", ->
         VirtDBConnector.close()
 
     it "should be able to connect to config service", ->
-        VirtDBConnector.connect "node-connector-test", "localhost"
+        NAME = "node-connector-test"
+        VirtDBConnector.connect NAME, "localhost"
         req_socket.connect.should.have.been.calledWith "localhost"
         endpoint =
             Endpoints: [
@@ -71,6 +72,12 @@ describe "VirtDBConnector", ->
             ]
         endpointSerialized = proto_service_config.serialize endpoint ,'virtdb.interface.pb.Endpoint'
         req_socket.send.should.have.been.calledWith endpointSerialized
+        VirtDBConnector.componentName.should.be.deep.equal NAME
+
+    it "should save the name of the component", ->
+        NAME = "node-connector-test"
+        VirtDBConnector.connect NAME, "localhost"
+        VirtDBConnector.componentName.should.be.deep.equal NAME
 
     detectIP = (done) ->
         message =
