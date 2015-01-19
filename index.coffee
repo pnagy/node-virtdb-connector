@@ -1,5 +1,4 @@
 udp         = require 'dgram'
-async       = require 'async'
 Protocol    = require './protocol'
 log         = require './log'
 zmq         = require 'zmq'
@@ -77,9 +76,7 @@ class VirtDBConnector
             when 'LOG_RECORD'
                 for connection in endpoint.Connections
                     if connection.Type == 'PUSH_PULL'
-                        newAddress = Protocol.connectToDiag connection.Address
-                        if newAddress?
-                            console.log "Connected to logger: ", newAddress
+                        Protocol.connectToDiag connection.Address
             else
                 if endpoint.Connections?
                     for connection in endpoint.Connections
