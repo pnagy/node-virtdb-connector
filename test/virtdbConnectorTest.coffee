@@ -72,7 +72,7 @@ describe "VirtDBConnector", ->
         endpointSerialized = proto_service_config.serialize endpoint ,'virtdb.interface.pb.Endpoint'
         req_socket.send.should.have.been.calledWith endpointSerialized
 
-    detectIP = ->
+    detectIP = (done) ->
         message =
             Endpoints: [
                 Name: "discovery"
@@ -88,17 +88,28 @@ describe "VirtDBConnector", ->
         req_socket.callback(messageSerialized)
         ip = "tcp://127.0.0.1:54321"
         udp_socket.send.should.have.been.called
-        udp_socket.callback ip
-        udp_socket.close.should.have.been.called
-        VirtDBConnector.IP.should.equal ip
+        setTimeout () ->
+            udp_socket.callback ip
+            setTimeout () ->
+                udp_socket.close.should.have.been.called
+                VirtDBConnector.IP.should.equal ip
+                if (done?)
+                    done()
+            , 100
+        , 200
 
-    it "should detect its own IP", ->
+    it "should detect its own IP", (done) ->
+        this.timeout(400)
         VirtDBConnector.connect "node-connector-test", "localhost"
-        detectIP()
+        detectIP(done)
 
-    it "should perform the callback when IP is detected", ->
+    it "should perform the callback when IP is detected", (done) ->
+        this.timeout(500)
         cb = sinon.spy()
         VirtDBConnector.onIP cb
         VirtDBConnector.connect "node-connector-test", "localhost"
         detectIP()
-        cb.should.have.been.called
+        setTimeout () ->
+            cb.should.have.been.called
+            done()
+        , 400

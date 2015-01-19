@@ -90,7 +90,6 @@ class VirtDBConnector
     @_findMyIP: (discoveryAddress) =>
         if discoveryAddress.indexOf 'raw_udp://' == 0
             client = null
-            message = new Buffer('?')
             address = discoveryAddress.replace /^raw_udp:\/\//, ''
             if address.indexOf('[') > -1 # IPv6
                 ip = address.replace /^\[|\]:[0-9]{2,5}/g, ''
@@ -109,19 +108,20 @@ class VirtDBConnector
                 @callbacks = []
                 client.close()
 
+            wait_for_ip = (client, port, ip) =>
+                if @IP?
+                    return
+                else
+                    try
+                        message = new Buffer('?')
+                        client?.send  message, 0, 1, port, ip, (err, bytes) ->
+                            if err
+                                console.log err
+                    catch ex
+                        console.log ex
+                    setTimeout wait_for_ip, 10, client, port, ip
 
-            async.retry 5, (callback, results) =>
-                err = null
-                client?.send message, 0, 1, port, ip, (err, bytes) ->
-                    if err
-                        console.log err
-                setTimeout =>
-                    if @IP == null
-                        err = "IP is not set yet!"
-                    callback err, @IP
-                , 50
-            , ->
-                return
+            wait_for_ip client, port, ip
 
     @_OnBound: (name, socket, svcType, zmqType) =>
         return (err) =>
