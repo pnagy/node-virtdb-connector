@@ -23,23 +23,23 @@ class Log
 
     @trace: (args...) ->
         if @level in ['trace']
-            Diag._log 'VIRTDB_SIMPLE_TRACE', args
+            Diag.log 'VIRTDB_SIMPLE_TRACE', args
 
     @debug: (args...) ->
         if @level in ['trace', 'debug']
-            Diag._log 'VIRTDB_SIMPLE_TRACE', args
+            Diag.log 'VIRTDB_SIMPLE_TRACE', args
 
     @info: (args...) ->
         if @level in ['trace', 'debug', 'info']
-            Diag._log 'VIRTDB_INFO', args
+            Diag.log 'VIRTDB_INFO', args
 
     @warn: (args...) ->
         if @level in ['trace', 'debug', 'info', 'warn']
-            Diag._log 'VIRTDB_INFO', args
+            Diag.log 'VIRTDB_INFO', args
 
     @error: (args...) ->
         if @level in ['trace', 'debug', 'info', 'warn', 'error']
-            Diag._log 'VIRTDB_ERROR', args
+            Diag.log 'VIRTDB_ERROR', args
 
     @setLevel: (level) =>
         @level = level.toLowerCase?()
