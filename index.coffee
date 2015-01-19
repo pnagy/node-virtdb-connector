@@ -17,6 +17,7 @@ class VirtDBConnector
 
     @connect: (name, connectionString) =>
         @handler = new Protocol.EndpointHandler connectionString, @_onEndpoint
+        log.setComponentName name
 
         endpoint =
             Endpoints: [

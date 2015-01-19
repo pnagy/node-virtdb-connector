@@ -31,7 +31,6 @@
     "source-map-support": "~0.2.7"
   },
   "dependencies": {
-    "nomnom": "^1.8.1",
     "virtdb-proto": "git://github.com/starschema/virtdb-proto",
     "zmq": "^2.8.0"
   }

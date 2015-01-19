@@ -1,4 +1,3 @@
-cliOptions = require('nomnom').parse()
 Protocol = require './protocol'
 os = require 'os'
 
@@ -50,7 +49,8 @@ class Diag
     @_newSymbols = []
     @_headers = {}
     @_newHeaders = []
-    @_isConsoleLogEnabled = false
+    @isConsoleLogEnabled = false
+    @componentName = null
 
     @startDate: =>
         if not @_startDate?
@@ -67,17 +67,13 @@ class Diag
             @_random = Math.floor(Math.random() * 100000000 + 1)
         @_random
 
-    @process_name: =>
-        @_name ?= cliOptions.name
-        return @_name
-
     @_getProcessInfo: () =>
         Process =
             StartDate: @startDate()
             StartTime: @startTime()
             Pid: process.pid
             Random: @random()
-            NameSymbol: @_getSymbolSeqNo @process_name()
+            NameSymbol: @_getSymbolSeqNo @componentName
             HostSymbol: @_getSymbolSeqNo os.hostname()
         return Process
 
@@ -212,9 +208,9 @@ class Diag
         return record
 
 
-    @_log: (level, args) =>
+    @log: (level, args) =>
         record = @_createDiagServiceMessage level, args
-        if (not Protocol.sendDiag record) or Diag._isConsoleLogEnabled
+        if (not Protocol.sendDiag record) or (Diag.isConsoleLogEnabled is true)
             console.log level + ": " + @_createConsoleLogMessage args
 
 module.exports = Diag
