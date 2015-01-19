@@ -41,7 +41,6 @@ class Protocol
         try
             @diag_socket.send proto_diag.serialize logRecord, "virtdb.interface.pb.LogRecord"
         catch ex
-            console.error "Couldn't send log message: ", ex
             return false
         return true
 

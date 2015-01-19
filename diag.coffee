@@ -28,16 +28,16 @@ Object.defineProperty global, "__stack",
 
 Object.defineProperty global, "__line",
     get: ->
-        __stack[3].getLineNumber()
+        __stack[4].getLineNumber()
 
 Object.defineProperty global, "__file",
     get: ->
-        name = __stack[3].getFileName()
+        name = __stack[4].getFileName()
         name.substring process.cwd().length, name.length
 
 Object.defineProperty global, "__func",
     get: ->
-        __stack[3].getFunctionName() or ""
+        __stack[4].getFunctionName() or ""
 
 
 class Diag
@@ -192,6 +192,7 @@ class Diag
         return argTexts.join " "
 
     @_createDiagServiceMessage: (level, args) =>
+
         record = {}
         record.Process = @_getProcessInfo()
         record.Data = [
@@ -213,7 +214,7 @@ class Diag
 
     @_log: (level, args) =>
         record = @_createDiagServiceMessage level, args
-        if not Protocol.sendDiag record or Diag._isConsoleLogEnabled
-            console.error level + ": " + @_createConsoleLogMessage args
+        if (not Protocol.sendDiag record) or Diag._isConsoleLogEnabled
+            console.log level + ": " + @_createConsoleLogMessage args
 
 module.exports = Diag

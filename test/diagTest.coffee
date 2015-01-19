@@ -26,7 +26,7 @@ describe "Diag _log", ->
         CONSOLE_MSG = LEVEL + ": " + LOG_MSG
         RECORD = "RECORD"
 
-        consoleErrorStub = sandbox.stub console, "error"
+        consoleLogStub = sandbox.stub console, "log"
         createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
         createDiagServiceMessageStub.returns RECORD
         createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
@@ -36,8 +36,8 @@ describe "Diag _log", ->
 
         Diag._log LEVEL, ARGS
 
-        consoleErrorStub.should.have.been.calledOnce
-        consoleErrorStub.should.have.been.calledWithExactly CONSOLE_MSG
+        consoleLogStub.should.have.been.calledOnce
+        consoleLogStub.should.have.been.calledWithExactly CONSOLE_MSG
         protocolSendStub.should.have.been.calledOnce
         protocolSendStub.should.have.been.calledWithExactly RECORD
         createDiagServiceMessageStub.should.have.been.calledOnce
@@ -52,7 +52,7 @@ describe "Diag _log", ->
         CONSOLE_MSG = LEVEL + ": " + LOG_MSG
         RECORD = "RECORD"
 
-        consoleErrorStub = sandbox.stub console, "error"
+        consoleLogStub = sandbox.stub console, "log"
         createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
         createDiagServiceMessageStub.returns RECORD
         createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
@@ -62,8 +62,8 @@ describe "Diag _log", ->
 
         Diag._log LEVEL, ARGS
 
-        consoleErrorStub.should.have.been.calledOnce
-        consoleErrorStub.should.have.been.calledWithExactly CONSOLE_MSG
+        consoleLogStub.should.have.been.calledOnce
+        consoleLogStub.should.have.been.calledWithExactly CONSOLE_MSG
         protocolSendStub.should.have.been.calledOnce
         protocolSendStub.should.have.been.calledWithExactly RECORD
         createDiagServiceMessageStub.should.have.been.calledOnce
@@ -78,7 +78,7 @@ describe "Diag _log", ->
         CONSOLE_MSG = LEVEL + ": " + LOG_MSG
         RECORD = "RECORD"
 
-        consoleErrorStub = sandbox.stub console, "error"
+        consoleLogStub = sandbox.stub console, "log"
         createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
         createDiagServiceMessageStub.returns RECORD
         createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
@@ -88,7 +88,7 @@ describe "Diag _log", ->
 
         Diag._log LEVEL, ARGS
 
-        consoleErrorStub.should.not.have.been.calledOnce
+        consoleLogStub.should.not.have.been.calledOnce
         protocolSendStub.should.have.been.calledOnce
         protocolSendStub.should.have.been.calledWithExactly RECORD
         createDiagServiceMessageStub.should.have.been.calledOnce
