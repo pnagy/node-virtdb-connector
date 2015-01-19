@@ -49,7 +49,7 @@ class Diag
     @_newSymbols = []
     @_headers = {}
     @_newHeaders = []
-    @_isConsoleLogEnabled = false
+    @isConsoleLogEnabled = false
     @componentName = null
 
     @startDate: =>
@@ -208,9 +208,9 @@ class Diag
         return record
 
 
-    @_log: (level, args) =>
+    @log: (level, args) =>
         record = @_createDiagServiceMessage level, args
-        if (not Protocol.sendDiag record) or Diag._isConsoleLogEnabled
+        if (not Protocol.sendDiag record) or (Diag.isConsoleLogEnabled is true)
             console.log level + ": " + @_createConsoleLogMessage args
 
 module.exports = Diag

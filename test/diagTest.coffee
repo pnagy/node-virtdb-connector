@@ -8,7 +8,7 @@ sinon = require "sinon"
 sinonChai = require "sinon-chai"
 chai.use sinonChai
 
-describe "Diag _log", ->
+describe "Diag log", ->
 
     sandbox = null
 
@@ -16,7 +16,7 @@ describe "Diag _log", ->
         sandbox = sinon.sandbox.create()
 
     afterEach =>
-        Diag._isConsoleLogEnabled = false
+        Diag.isConsoleLogEnabled = false
         sandbox.restore()
 
     it "should log the message to the console when flag is switched on", ->
@@ -26,18 +26,20 @@ describe "Diag _log", ->
         CONSOLE_MSG = LEVEL + ": " + LOG_MSG
         RECORD = "RECORD"
 
-        consoleLogStub = sandbox.stub console, "log"
+        consoleLogSpy = sandbox.spy console, "log"
         createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
         createDiagServiceMessageStub.returns RECORD
         createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
         protocolSendStub = sandbox.stub Protocol, "sendDiag"
+        protocolSendStub.returns true
         createConsoleLogMessageStub.returns LOG_MSG
-        Diag._isConsoleLogEnabled = true
+        Diag.isConsoleLogEnabled = true
 
-        Diag._log LEVEL, ARGS
 
-        consoleLogStub.should.have.been.calledOnce
-        consoleLogStub.should.have.been.calledWithExactly CONSOLE_MSG
+        Diag.log LEVEL, ARGS
+
+        consoleLogSpy.should.have.been.calledOnce
+        consoleLogSpy.should.have.been.calledWithExactly CONSOLE_MSG
         protocolSendStub.should.have.been.calledOnce
         protocolSendStub.should.have.been.calledWithExactly RECORD
         createDiagServiceMessageStub.should.have.been.calledOnce
@@ -52,7 +54,7 @@ describe "Diag _log", ->
         CONSOLE_MSG = LEVEL + ": " + LOG_MSG
         RECORD = "RECORD"
 
-        consoleLogStub = sandbox.stub console, "log"
+        consoleLogSpy = sandbox.spy console, "log"
         createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
         createDiagServiceMessageStub.returns RECORD
         createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
@@ -60,10 +62,10 @@ describe "Diag _log", ->
         protocolSendStub.returns false
         createConsoleLogMessageStub.returns LOG_MSG
 
-        Diag._log LEVEL, ARGS
+        Diag.log LEVEL, ARGS
 
-        consoleLogStub.should.have.been.calledOnce
-        consoleLogStub.should.have.been.calledWithExactly CONSOLE_MSG
+        consoleLogSpy.should.have.been.calledOnce
+        consoleLogSpy.should.have.been.calledWithExactly CONSOLE_MSG
         protocolSendStub.should.have.been.calledOnce
         protocolSendStub.should.have.been.calledWithExactly RECORD
         createDiagServiceMessageStub.should.have.been.calledOnce
@@ -78,7 +80,7 @@ describe "Diag _log", ->
         CONSOLE_MSG = LEVEL + ": " + LOG_MSG
         RECORD = "RECORD"
 
-        consoleLogStub = sandbox.stub console, "log"
+        consoleLogSpy = sandbox.spy console, "log"
         createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
         createDiagServiceMessageStub.returns RECORD
         createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
@@ -86,9 +88,9 @@ describe "Diag _log", ->
         protocolSendStub.returns true
         createConsoleLogMessageStub.returns LOG_MSG
 
-        Diag._log LEVEL, ARGS
+        Diag.log LEVEL, ARGS
 
-        consoleLogStub.should.not.have.been.calledOnce
+        consoleLogSpy.should.not.have.been.calledOnce
         protocolSendStub.should.have.been.calledOnce
         protocolSendStub.should.have.been.calledWithExactly RECORD
         createDiagServiceMessageStub.should.have.been.calledOnce

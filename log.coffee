@@ -51,7 +51,7 @@ class Log
         @setLevel @levels.SILENT
 
     @enableConsoleLog: (isEnabled) =>
-        Diag._isConsoleLogEnabled = isEnabled
+        Diag.isConsoleLogEnabled = isEnabled
 
     @Variable = (param) ->
         new Variable(param)
