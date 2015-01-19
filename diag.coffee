@@ -1,5 +1,4 @@
 Protocol = require './protocol'
-VirtDbConnector = require "./index"
 os = require 'os'
 
 Date::yyyymmdd = () ->
@@ -51,6 +50,7 @@ class Diag
     @_headers = {}
     @_newHeaders = []
     @_isConsoleLogEnabled = false
+    @componentName = null
 
     @startDate: =>
         if not @_startDate?
@@ -67,17 +67,13 @@ class Diag
             @_random = Math.floor(Math.random() * 100000000 + 1)
         @_random
 
-    @process_name: =>
-        @_name ?= VirtDbConnector.componentName
-        return @_name
-
     @_getProcessInfo: () =>
         Process =
             StartDate: @startDate()
             StartTime: @startTime()
             Pid: process.pid
             Random: @random()
-            NameSymbol: @_getSymbolSeqNo @process_name()
+            NameSymbol: @_getSymbolSeqNo @componentName
             HostSymbol: @_getSymbolSeqNo os.hostname()
         return Process
 

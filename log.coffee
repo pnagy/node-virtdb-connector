@@ -18,6 +18,9 @@ class Log
 
     @level = 'trace'
 
+    @setComponentName: (name) ->
+        Diag.componentName = name
+
     @trace: (args...) ->
         if @level in ['trace']
             Diag._log 'VIRTDB_SIMPLE_TRACE', args
