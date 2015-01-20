@@ -22,7 +22,7 @@ class EndpointHandler
         @svcConfigSocket.send proto_service_config.serialize endpoint, 'virtdb.interface.pb.Endpoint'
 
     close: () =>
-        @svcConfigSocket.close()
+        @svcConfigSocket?.close()
         @Handlers = {}
 
     on: (service_type, connection_type, callback) =>
