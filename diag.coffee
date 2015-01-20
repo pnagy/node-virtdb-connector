@@ -211,12 +211,12 @@ class Diag
 
 
     @log: (level, args) =>
-        record = @_createDiagServiceMessage level, args
-        if Protocol.sendDiag record
+        isSendingSuccessful = Protocol.sendDiag @_createDiagServiceMessage level, args
+
+        if isSendingSuccessful
             @_clearSentHeadersAndSymbols()
-            if Diag.isConsoleLogEnabled is true
-                console.log level + ": " + @_createConsoleLogMessage args
-        else
-                console.log level + ": " + @_createConsoleLogMessage args
+
+        if (Diag.isConsoleLogEnabled is true) or (not isSendingSuccessful)
+            console.log level + ": " + @_createConsoleLogMessage args
 
 module.exports = Diag
