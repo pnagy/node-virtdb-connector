@@ -8,7 +8,7 @@ class Variable
         util.inspect @content, depth: null
 
 class Log
-    @levels =
+    @Levels:
         SILENT: 'silent'
         TRACE: 'trace'
         DEBUG: 'debug'
@@ -45,10 +45,10 @@ class Log
         @level = level.toLowerCase?()
 
     @enableAll: () =>
-        @setLevel @levels.TRACE
+        @setLevel @Levels.TRACE
 
     @disableAll: () =>
-        @setLevel @levels.SILENT
+        @setLevel @Levels.SILENT
 
     @enableConsoleLog: (isEnabled) =>
         Diag.isConsoleLogEnabled = isEnabled
