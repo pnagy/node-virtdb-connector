@@ -10,14 +10,18 @@ class VirtDBConnector
     @IP: null
     @log = log
     @Constants = Constants
-    @Handlers = {}
     @Sockets = {}
     @Convert = Convert
-    @handler = null
+    @handler = new EndpointHandler()
     @callbacks = []
 
     @connect: (name, connectionString) =>
-        @handler = new EndpointHandler connectionString, @_onEndpoint
+        @handler.on 'IP_DISCOVERY', 'RAW_UDP', (name, addresses) =>
+            @_findMyIP addresses[0] # TODO should we handle more addresses here?
+        @handler.on 'LOG_RECORD', 'PUSH_PULL', (name, addresses) =>
+            Protocol.connectToDiag addresses
+        @subscribe 'ENDPOINT', @handler.onEndpoint
+        @handler.connect connectionString
         log.setComponentName name
 
         endpoint =
@@ -30,61 +34,55 @@ class VirtDBConnector
     @close: =>
         @handler?.close()
         @IP = null
-        @Handlers = {}
         @Sockets = {}
-        @handler = null
+        @handler = new EndpointHandler()
         @callbacks = []
 
     @onAddress: (service_type, connection_type, callback) =>
-        @Handlers[service_type] ?= {}
-        @Handlers[service_type][connection_type] = callback
+        @handler.on service_type, connection_type, callback
 
-    @subscribe: (service_type, connection_type, callback, channel) =>
-        @onAddress service_type, connection_type, (name, address) =>
-            if connection_type == 'PUB_SUB'
-                socket_type = 'sub'
-            if @Sockets?[name]?[service_type]?[connection_type]?
-                @Sockets[name][service_type][connection_type].unsubscribe channel
-                @Sockets[name][service_type][connection_type].close()
-                @Sockets[name][service_type][connection_type] = null
-
-            @Sockets[name] ?= {}
-            @Sockets[name][service_type] ?= {}
-            @Sockets[name][service_type][connection_type] = zmq.socket socket_type
-            socket = @Sockets[name][service_type][connection_type]
+    @subscribe: (service_type, callback, channel) =>
+        @handler.on service_type, 'PUB_SUB', (name, addresses) =>
+            socket = @Sockets?[name]?[service_type]
+            socket?.unsubscribe channel
+            socket?.close()
+            socket ?= zmq.socket 'sub'
             socket.on "message", callback
-            socket.connect address
-            if connection_type == 'PUB_SUB' and channel?
-                socket.subscribe channel
-
-    @onIP: (callback) =>
-        if @IP?
-            console.log "Our IP:", @IP
-            callback()
-        else
-            @callbacks.push callback
+            for address in addresses
+                socket.connect address
+            channel ?= ""
+            socket.subscribe channel
+            @Sockets[name] ?= {}
+            @Sockets[name][service_type] = socket
 
     @setupEndpoint: (name, protocol_call, callback) =>
-        protocol_call name, 'tcp://' + @IP + ':*', callback, @_OnBound
+        onBound = (name, socket, svcType, zmqType) =>
+            return (err) =>
+                if err
+                    log.error "Error during binding socket: " + err
+                    return
+                zmqAddress = socket.getsockopt zmq.ZMQ_LAST_ENDPOINT
+                log.info "Listening (" + svcType + ") on", zmqAddress
+                endpoint =
+                    Endpoints: [
+                        Name: name
+                        SvcType: svcType
+                        Connections: [
+                            Type: zmqType
+                            Address: [
+                                zmqAddress
+                            ]
+                        ]
+                    ]
+                @handler.send endpoint
+
+        if @IP?
+            log.info "Our IP:", @IP
+            protocol_call name, 'tcp://' + @IP + ':*', callback, onBound
+        else
+            @callbacks.push () =>
+                protocol_call name, 'tcp://' + @IP + ':*', callback, onBound
         return
-
-    @_onEndpoint: (endpoint) =>
-        switch endpoint.SvcType
-            when 'IP_DISCOVERY'
-                if not @IP?
-                    for connection in endpoint.Connections
-                        if connection.Type == 'RAW_UDP'
-                            @_findMyIP connection.Address[0] # TODO should we handle more addresses here?
-            when 'LOG_RECORD'
-                for connection in endpoint.Connections
-                    if connection.Type == 'PUSH_PULL'
-                        Protocol.connectToDiag connection.Address
-            else
-                if endpoint.Connections?
-                    for connection in endpoint.Connections
-                        for address in connection.Address
-                            @Handlers?[endpoint.SvcType]?[connection.Type]? endpoint.Name, address
-
 
     @_findMyIP: (discoveryAddress) =>
         if discoveryAddress.indexOf 'raw_udp://' == 0
@@ -115,32 +113,11 @@ class VirtDBConnector
                         message = new Buffer('?')
                         client?.send  message, 0, 1, port, ip, (err, bytes) ->
                             if err
-                                console.log err
+                                log.error err
                     catch ex
-                        console.log ex
+                        log.error ex
                     setTimeout wait_for_ip, 10, client, port, ip
 
             wait_for_ip client, port, ip
-
-    @_OnBound: (name, socket, svcType, zmqType) =>
-        return (err) =>
-            if err
-                log.error "Error during binding socket: " + err
-                return
-            zmqAddress = socket.getsockopt zmq.ZMQ_LAST_ENDPOINT
-            console.log "Listening (" + svcType + ") on", zmqAddress
-            log.info "Listening (" + svcType + ") on", zmqAddress
-            endpoint =
-                Endpoints: [
-                    Name: name
-                    SvcType: svcType
-                    Connections: [
-                        Type: zmqType
-                        Address: [
-                            zmqAddress
-                        ]
-                    ]
-                ]
-            @handler.send endpoint
 
 module.exports = VirtDBConnector

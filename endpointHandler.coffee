@@ -1,18 +1,24 @@
 zmq         = require 'zmq'
 protobuf    = require 'virtdb-proto'
 proto_service_config = protobuf.service_config
+log         = require './log'
 
 class EndpointHandler
     svcConfigSocket = null
-    constructor: (connectionString, onEndpoint) ->
+    Handlers = null
+
+    constructor: () ->
+        @Handlers = {}
+
+    connect: (connectionString) ->
         @svcConfigSocket = zmq.socket 'req'
-        @svcConfigSocket.on 'message', (message) ->
+        @svcConfigSocket.on 'message', (message) =>
             try
                 endpointMessage = proto_service_config.parse message, 'virtdb.interface.pb.Endpoint'
                 for endpoint in endpointMessage.Endpoints
-                    onEndpoint endpoint
+                    @onEndpoint endpoint
             catch ex
-                console.log ex
+                log.error ex
         @svcConfigSocket.connect connectionString
 
     send: (endpoint) =>
@@ -20,5 +26,15 @@ class EndpointHandler
 
     close: () =>
         @svcConfigSocket.close()
+        @Handlers = {}
+
+    on: (service_type, connection_type, callback) =>
+        @Handlers[service_type] ?= {}
+        @Handlers[service_type][connection_type] = callback
+
+    onEndpoint: (endpoint) =>
+        if endpoint.Connections?
+            for connection in endpoint.Connections
+                @Handlers?[endpoint.SvcType]?[connection.Type]? endpoint.Name, connection.Address
 
 module.exports = EndpointHandler

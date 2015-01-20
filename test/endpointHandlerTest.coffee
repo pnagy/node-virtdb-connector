@@ -32,45 +32,70 @@ describe "EndpointHandler", ->
         sandbox.restore()
 
     it "should connect to endpoint service", ->
-        handler = new EndpointHandler url, () ->
+        handler = new EndpointHandler()
+        handler.connect(url)
         socket.connect.should.have.been.calledWith url
         socket.on.should.have.been.called.once
 
-    it "should not report empty messages", ->
-        callback = sandbox.spy()
-        handler = new EndpointHandler url, callback
+    it "should survive empty messages", ->
+        handler = new EndpointHandler()
+        handler.connect(url)
         endpoint = {}
         socket.callback protobuf.service_config.serialize endpoint, "virtdb.interface.pb.Endpoint"
-        callback.should.have.not.been.called
 
     it "should report single message", ->
         callback = sandbox.spy()
-        handler = new EndpointHandler url, callback
+        handler = new EndpointHandler()
+        handler.on 'QUERY', 'PUSH_PULL', callback
+        handler.connect url
         endpoint =
             Endpoints: [
                 Name: "name"
                 SvcType: "QUERY"
+                Connections: [
+                    Type: 'PUSH_PULL'
+                    Address: [
+                        'tcp://localhost:12345'
+                    ]
+                ]
             ]
         socket.callback protobuf.service_config.serialize endpoint, "virtdb.interface.pb.Endpoint"
         callback.should.have.been.called.once
 
-    it "should report multiple message", ->
+    it "should report multiple messages", ->
         callback = sandbox.spy()
-        handler = new EndpointHandler url, callback
+        handler = new EndpointHandler()
+        handler.on 'QUERY', 'PUSH_PULL', callback
+        handler.on 'COLUMN', 'PUB_SUB', callback
+        handler.connect url
         endpoint =
             Endpoints: [
                 Name: "name"
                 SvcType: "QUERY"
+                Connections: [
+                    Type: 'PUSH_PULL'
+                    Address: [
+                        'tcp://localhost:12345'
+                    ]
+                ]
             ,
                 Name: "name"
                 SvcType: "COLUMN"
+                Connections: [
+                    Type: 'PUB_SUB'
+                    Address: [
+                        'tcp://localhost:12346'
+                    ]
+                ]
             ]
         socket.callback protobuf.service_config.serialize endpoint, "virtdb.interface.pb.Endpoint"
         callback.should.have.been.called.twice
 
     it "should survive malformed protocol buffers", ->
         callback = sandbox.spy()
-        handler = new EndpointHandler url, callback
+        handler = new EndpointHandler()
+        handler.connect url
+        handler.on 'QUERY', 'PUSH_PULL', callback
         endpoint =
             Endpoints: [
                 Name: "name"
@@ -84,6 +109,7 @@ describe "EndpointHandler", ->
                 Name: "name"
                 SvcType: "QUERY"
             ]
-        handler = new EndpointHandler url, () ->
+        handler = new EndpointHandler()
+        handler.connect url
         handler.send endpoint
         socket.send.should.have.been.called.once

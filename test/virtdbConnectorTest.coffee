@@ -18,10 +18,12 @@ class SocketStub
     connect: null
     send: null
     close: null
+    subscribe: null
     constructor: ->
         @connect = sinon.spy()
         @send = sinon.spy()
         @close = sinon.spy()
+        @subscribe = sinon.spy()
     on: (message, @callback) =>
     # bind: (address, callback) =>
     #     @bound = true
@@ -43,14 +45,18 @@ class UDPSocketStub
 describe "VirtDBConnector", ->
     sandbox = null
     req_socket = null
+    sub_socket = null
     udp_socket = null
 
     beforeEach =>
         sandbox = sinon.sandbox.create()
         req_socket = new SocketStub
+        sub_socket = new SocketStub
         connectStub = sandbox.stub zmq, "socket", (type) =>
             if type is 'req'
                 return req_socket
+            if type is 'sub'
+                return sub_socket
             else
                 return null
         udp_socket = new UDPSocketStub
@@ -95,7 +101,7 @@ describe "VirtDBConnector", ->
         ]
         messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
         req_socket.callback(messageSerialized)
-        ip = "tcp://127.0.0.1:54321"
+        ip = "127.0.0.1"
         udp_socket.send.should.have.been.called
         setTimeout () ->
             udp_socket.callback ip
@@ -115,11 +121,23 @@ describe "VirtDBConnector", ->
     it "should perform the callback when IP is detected", (done) ->
         this.timeout(500)
         cb = sandbox.spy()
-        VirtDBConnector.onIP cb
+        VirtDBConnector.setupEndpoint "test", cb
         VirtDBConnector.connect "node-connector-test", "localhost"
         detectIP()
         setTimeout () ->
             cb.should.have.been.called
+            done()
+        , 400
+
+    it "should be able to set up endpoints", (done) ->
+        this.timeout(500)
+        cb = sandbox.spy()
+        protocol_call = sandbox.spy()
+        VirtDBConnector.setupEndpoint "test", protocol_call, cb
+        VirtDBConnector.connect "node-connector-test", "localhost"
+        detectIP()
+        setTimeout () ->
+            protocol_call.should.have.been.calledWith('test', 'tcp://127.0.0.1:*')
             done()
         , 400
 
@@ -162,3 +180,28 @@ describe "VirtDBConnector", ->
         messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
         req_socket.callback(messageSerialized)
         cb.should.have.not.been.called
+
+    it "should call the last registered callback subscribed to a PUB_SUB endpoint", ->
+        cb_replaced = sandbox.spy()
+        cb = sandbox.spy()
+        NAME = "node-connector-test"
+        VirtDBConnector.subscribe 'COLUMN', cb_replaced
+        VirtDBConnector.subscribe 'COLUMN', cb
+        VirtDBConnector.connect NAME, "localhost"
+        message =
+            Endpoints: [
+                Name: "test"
+                SvcType: 'COLUMN'
+                Connections: [
+                    Type: "PUB_SUB"
+                    Address: [
+                        "tcp://127.0.0.1:12345"
+                    ]
+                ]
+        ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+        sub_socket.subscribe.should.have.been.calledWith('')
+        sub_socket.callback('message')
+        cb.should.have.been.called
+        cb_replaced.should.not.have.been.called
