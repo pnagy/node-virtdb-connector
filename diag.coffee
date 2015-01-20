@@ -81,15 +81,17 @@ class Diag
         Symbols = []
         for symbol in @_newSymbols
             Symbols.push symbol
-        @_newSymbols = []
         return Symbols
 
     @_getNewHeaders: () =>
         Headers = []
         for header in @_newHeaders
             Headers.push header
-        @_newHeaders = []
         return Headers
+
+    @_clearSentHeadersAndSymbols: () =>
+        @_newHeaders = []
+        @_newSymbols = []
 
     @_getSymbolSeqNo: (symbolValue) =>
         if symbolValue not of @_symbols
@@ -209,8 +211,12 @@ class Diag
 
 
     @log: (level, args) =>
-        record = @_createDiagServiceMessage level, args
-        if (not Protocol.sendDiag record) or (Diag.isConsoleLogEnabled is true)
+        isSendingSuccessful = Protocol.sendDiag @_createDiagServiceMessage level, args
+
+        if isSendingSuccessful
+            @_clearSentHeadersAndSymbols()
+
+        if (Diag.isConsoleLogEnabled is true) or (not isSendingSuccessful)
             console.log level + ": " + @_createConsoleLogMessage args
 
 module.exports = Diag
