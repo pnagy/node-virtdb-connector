@@ -141,10 +141,12 @@ describe "VirtDBConnector", ->
             done()
         , 400
 
-    it "should call the registered callback handler when a given endpoint is received on req_rep socket", ->
-        cb = sandbox.spy()
+    it "should call the registered callback handlers when a given endpoint is received on req_rep socket", ->
+        cb1 = sandbox.spy()
+        cb2 = sandbox.spy()
         NAME = "node-connector-test"
-        VirtDBConnector.onAddress 'QUERY', 'PUSH_PULL', cb
+        VirtDBConnector.onAddress 'QUERY', 'PUSH_PULL', cb1
+        VirtDBConnector.onAddress 'QUERY', 'PUSH_PULL', cb2
         VirtDBConnector.connect NAME, "localhost"
         message =
             Endpoints: [
@@ -159,7 +161,8 @@ describe "VirtDBConnector", ->
         ]
         messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
         req_socket.callback(messageSerialized)
-        cb.should.have.been.called
+        cb1.should.have.been.called
+        cb2.should.have.been.called
 
     it "should not call the registered callback handler when a different endpoint is received on req_rep socket", ->
         cb = sandbox.spy()
@@ -181,12 +184,12 @@ describe "VirtDBConnector", ->
         req_socket.callback(messageSerialized)
         cb.should.have.not.been.called
 
-    it "should call the last registered callback subscribed to a PUB_SUB endpoint", ->
-        cb_replaced = sandbox.spy()
-        cb = sandbox.spy()
+    it "should call the registered callbacks subscribed to a PUB_SUB endpoint", ->
+        cb1 = sandbox.spy()
+        cb2 = sandbox.spy()
         NAME = "node-connector-test"
-        VirtDBConnector.subscribe 'COLUMN', cb_replaced
-        VirtDBConnector.subscribe 'COLUMN', cb
+        VirtDBConnector.subscribe 'COLUMN', cb1
+        VirtDBConnector.subscribe 'COLUMN', cb2
         VirtDBConnector.connect NAME, "localhost"
         message =
             Endpoints: [
@@ -203,5 +206,5 @@ describe "VirtDBConnector", ->
         req_socket.callback(messageSerialized)
         sub_socket.subscribe.should.have.been.calledWith('')
         sub_socket.callback('message')
-        cb.should.have.been.called
-        cb_replaced.should.not.have.been.called
+        cb1.should.have.been.calledWith('message')
+        cb2.should.have.been.calledWith('message')

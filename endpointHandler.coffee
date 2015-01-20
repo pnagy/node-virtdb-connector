@@ -30,11 +30,13 @@ class EndpointHandler
 
     on: (service_type, connection_type, callback) =>
         @Handlers[service_type] ?= {}
-        @Handlers[service_type][connection_type] = callback
+        @Handlers[service_type][connection_type] ?= []
+        @Handlers[service_type][connection_type].push callback
 
     onEndpoint: (endpoint) =>
         if endpoint.Connections?
             for connection in endpoint.Connections
-                @Handlers?[endpoint.SvcType]?[connection.Type]? endpoint.Name, connection.Address
+                for callback in @Handlers?[endpoint.SvcType]?[connection.Type]
+                    callback endpoint.Name, connection.Address
 
 module.exports = EndpointHandler

@@ -14,6 +14,7 @@ class VirtDBConnector
     @Convert = Convert
     @handler = new EndpointHandler()
     @callbacks = []
+    @PubSubCallbacks = null
 
     @connect: (name, connectionString) =>
         @handler.on 'IP_DISCOVERY', 'RAW_UDP', (name, addresses) =>
@@ -37,17 +38,21 @@ class VirtDBConnector
         @Sockets = {}
         @handler = new EndpointHandler()
         @callbacks = []
+        @PubSubCallbacks = null
 
     @onAddress: (service_type, connection_type, callback) =>
         @handler.on service_type, connection_type, callback
 
     @subscribe: (service_type, callback, channel) =>
+        @PubSubCallbacks ?= {}
+        @PubSubCallbacks[service_type] ?= []
+        @PubSubCallbacks[service_type].push callback
         @handler.on service_type, 'PUB_SUB', (name, addresses) =>
             socket = @Sockets?[name]?[service_type]
-            socket?.unsubscribe channel
-            socket?.close()
             socket ?= zmq.socket 'sub'
-            socket.on "message", callback
+            socket.on "message", (message) =>
+                for callback in @PubSubCallbacks[service_type]
+                    callback message
             for address in addresses
                 socket.connect address
             channel ?= ""
