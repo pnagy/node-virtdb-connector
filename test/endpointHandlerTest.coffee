@@ -62,6 +62,23 @@ describe "EndpointHandler", ->
         socket.callback protobuf.service_config.serialize endpoint, "virtdb.interface.pb.Endpoint"
         callback.should.have.been.called.once
 
+    it "should not crash when there is no handler for the given endpoint", ->
+        handler = new EndpointHandler()
+        handler.connect url
+        endpoint =
+            Endpoints: [
+                Name: "name"
+                SvcType: "QUERY"
+                Connections: [
+                    Type: 'PUSH_PULL'
+                    Address: [
+                        'tcp://localhost:12345'
+                    ]
+                ]
+            ]
+        socket.callback.should.not.throw
+        socket.callback protobuf.service_config.serialize endpoint, "virtdb.interface.pb.Endpoint"
+
     it "should report multiple messages", ->
         callback = sandbox.spy()
         handler = new EndpointHandler()
@@ -90,18 +107,6 @@ describe "EndpointHandler", ->
             ]
         socket.callback protobuf.service_config.serialize endpoint, "virtdb.interface.pb.Endpoint"
         callback.should.have.been.called.twice
-
-    it "should survive malformed protocol buffers", ->
-        callback = sandbox.spy()
-        handler = new EndpointHandler()
-        handler.connect url
-        handler.on 'QUERY', 'PUSH_PULL', callback
-        endpoint =
-            Endpoints: [
-                Name: "name"
-            ]
-        socket.callback protobuf.service_config.serialize endpoint, "virtdb.interface.pb.Endpoint"
-        callback.should.have.not.been.called
 
     it "should send endpoint messages", ->
         endpoint =
