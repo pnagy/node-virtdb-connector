@@ -13,12 +13,9 @@ class EndpointHandler
     connect: (connectionString) ->
         @svcConfigSocket = zmq.socket 'req'
         @svcConfigSocket.on 'message', (message) =>
-            try
-                endpointMessage = proto_service_config.parse message, 'virtdb.interface.pb.Endpoint'
-                for endpoint in endpointMessage.Endpoints
-                    @onEndpoint endpoint
-            catch ex
-                log.error ex
+            endpointMessage = proto_service_config.parse message, 'virtdb.interface.pb.Endpoint'
+            for endpoint in endpointMessage.Endpoints
+                @onEndpoint endpoint
         @svcConfigSocket.connect connectionString
 
     send: (endpoint) =>
@@ -36,7 +33,8 @@ class EndpointHandler
     onEndpoint: (endpoint) =>
         if endpoint.Connections?
             for connection in endpoint.Connections
-                for callback in @Handlers?[endpoint.SvcType]?[connection.Type]
-                    callback endpoint.Name, connection.Address
+                if @Handlers?[endpoint.SvcType]?[connection.Type]?
+                    for callback in @Handlers?[endpoint.SvcType]?[connection.Type]
+                        callback endpoint.Name, connection.Address
 
 module.exports = EndpointHandler
