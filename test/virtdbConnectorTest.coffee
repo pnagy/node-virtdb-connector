@@ -114,7 +114,7 @@ describe "VirtDBConnector", ->
 
     it "should perform the callback when IP is detected", (done) ->
         this.timeout(500)
-        cb = sinon.spy()
+        cb = sandbox.spy()
         VirtDBConnector.onIP cb
         VirtDBConnector.connect "node-connector-test", "localhost"
         detectIP()
@@ -122,3 +122,43 @@ describe "VirtDBConnector", ->
             cb.should.have.been.called
             done()
         , 400
+
+    it "should call the registered callback handler when a given endpoint is received on req_rep socket", ->
+        cb = sandbox.spy()
+        NAME = "node-connector-test"
+        VirtDBConnector.onAddress 'QUERY', 'PUSH_PULL', cb
+        VirtDBConnector.connect NAME, "localhost"
+        message =
+            Endpoints: [
+                Name: "test"
+                SvcType: 'QUERY'
+                Connections: [
+                    Type: "PUSH_PULL"
+                    Address: [
+                        "tcp://127.0.0.1:12345"
+                    ]
+                ]
+        ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+        cb.should.have.been.called
+
+    it "should not call the registered callback handler when a different endpoint is received on req_rep socket", ->
+        cb = sandbox.spy()
+        NAME = "node-connector-test"
+        VirtDBConnector.onAddress 'QUERY', 'PUSH_PULL', cb
+        VirtDBConnector.connect NAME, "localhost"
+        message =
+            Endpoints: [
+                Name: "test"
+                SvcType: 'COLUMN'
+                Connections: [
+                    Type: "PUB_SUB"
+                    Address: [
+                        "tcp://127.0.0.1:12345"
+                    ]
+                ]
+        ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+        cb.should.have.not.been.called

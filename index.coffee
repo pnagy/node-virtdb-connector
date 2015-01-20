@@ -1,5 +1,6 @@
 udp         = require 'dgram'
 Protocol    = require './protocol'
+EndpointHandler = require './endpointHandler'
 log         = require './log'
 zmq         = require 'zmq'
 Constants   = require './constants'
@@ -16,7 +17,7 @@ class VirtDBConnector
     @callbacks = []
 
     @connect: (name, connectionString) =>
-        @handler = new Protocol.EndpointHandler connectionString, @_onEndpoint
+        @handler = new EndpointHandler connectionString, @_onEndpoint
         log.setComponentName name
 
         endpoint =

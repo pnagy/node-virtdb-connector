@@ -1,4 +1,4 @@
-EndpointHandler = (require "../protocol").EndpointHandler
+EndpointHandler = require "../endpointHandler"
 protobuf    = require 'virtdb-proto'
 zmq     = require 'zmq'
 
