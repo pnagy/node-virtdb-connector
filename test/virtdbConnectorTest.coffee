@@ -208,3 +208,7 @@ describe "VirtDBConnector", ->
         sub_socket.callback('message')
         cb1.should.have.been.calledWith('message')
         cb2.should.have.been.calledWith('message')
+
+    it "should be able to be closed without connecting", ->
+        VirtDBConnector.close.should.not.throw
+        VirtDBConnector.close()
