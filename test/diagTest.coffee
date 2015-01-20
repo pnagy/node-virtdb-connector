@@ -1,6 +1,7 @@
 Diag = require "../diag"
 Protocol = require "../protocol"
 util = require "util"
+os = require "os"
 
 chai = require "chai"
 chai.should()
@@ -34,7 +35,6 @@ describe "Diag log", ->
         protocolSendStub.returns true
         createConsoleLogMessageStub.returns LOG_MSG
         Diag.isConsoleLogEnabled = true
-
 
         Diag.log LEVEL, ARGS
 
@@ -96,6 +96,35 @@ describe "Diag log", ->
         createDiagServiceMessageStub.should.have.been.calledOnce
         createDiagServiceMessageStub.should.have.been.calledWithExactly LEVEL, ARGS
         createConsoleLogMessageStub.should.not.have.been.calledOnce
+
+    it "should clear the new symbols and new headers if sending was successful", ->
+        LEVEL = "loglevel"
+        ARGS = ["arg1"]
+
+        createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
+        createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
+        protocolSendStub = sandbox.stub Protocol, "sendDiag"
+        protocolSendStub.returns true
+        clearSentHeadersAndSymbolsStub = sandbox.stub Diag, "_clearSentHeadersAndSymbols"
+
+        Diag.log LEVEL, ARGS
+
+        clearSentHeadersAndSymbolsStub.should.have.been.calledOnce
+
+    it "should not clear the new symbols and new headers if sending failed", ->
+        LEVEL = "loglevel"
+        ARGS = ["arg1"]
+
+        createDiagServiceMessageStub = sandbox.stub Diag, "_createDiagServiceMessage"
+        createConsoleLogMessageStub = sandbox.stub Diag, "_createConsoleLogMessage"
+        protocolSendStub = sandbox.stub Protocol, "sendDiag"
+        protocolSendStub.returns false
+        clearSentHeadersAndSymbolsStub = sandbox.stub Diag, "_clearSentHeadersAndSymbols"
+
+        Diag.log LEVEL, ARGS
+
+        clearSentHeadersAndSymbolsStub.should.not.have.been.calledOnce
+
 
 describe "Diag _createConsoleLogMessage", ->
 
@@ -192,3 +221,30 @@ describe "Diag _createDiagServiceMessage", ->
         message.Headers[0].Parts[0].IsVariable.should.equal(false)
         message.Headers[0].Parts[0].PartSymbol.should.equal(4)
         message.Headers[0].Parts[0].Type.should.equal('STRING')
+
+describe "Diag _getProcessInfo", ->
+    sandbox = null
+
+    beforeEach =>
+        sandbox = sinon.sandbox.create()
+
+    afterEach =>
+        sandbox.restore()
+
+    it "should set good hostname and component name", ->
+        HOSTNAME = "host"
+        COMPNAME = "comp"
+
+        hostnameStub = sandbox.stub os, "hostname"
+        hostnameStub.returns HOSTNAME
+        Diag.componentName = COMPNAME
+        getSeqStub = sandbox.stub Diag, "_getSymbolSeqNo"
+        getSeqStub.onFirstCall().returns 1
+        getSeqStub.onSecondCall().returns 2
+
+        process = Diag._getProcessInfo()
+
+        getSeqStub.getCall(0).should.have.been.calledWithExactly COMPNAME
+        getSeqStub.getCall(1).should.have.been.calledWithExactly HOSTNAME
+        process.should.have.deep.property "NameSymbol", 1
+        process.should.have.deep.property "HostSymbol", 2

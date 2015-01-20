@@ -23,10 +23,11 @@ class Protocol
     @connectToDiag: (addresses) =>
         ret = null
         connected = false
-        for address in addresses
-            if not @diag_socket?
-                @diag_socket = zmq.socket "push"
-            @diag_socket.connect address
+        if addresses
+            for address in addresses
+                if not @diag_socket?
+                    @diag_socket = zmq.socket "push"
+                @diag_socket.connect address
 
     @close: () =>
         @diag_socket?.close()
