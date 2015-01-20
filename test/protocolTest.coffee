@@ -35,9 +35,7 @@ describe "Protocol", ->
 
     it "should not fail if not getting addresses", ->
         Protocol.connectToDiag.should.not.throw
-        # handler = new EndpointHandler url, () ->
-        # socket.connect.should.have.been.calledWith url
-        # socket.on.should.have.been.called.once
+        Protocol.connectToDiag()
 
     it "should be able to connect", ->
         addresses = [
