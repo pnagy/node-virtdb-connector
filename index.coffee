@@ -62,24 +62,20 @@ class VirtDBConnector
 
     @setupEndpoint: (name, protocol_call, callback) =>
         onBound = (name, socket, svcType, zmqType) =>
-            return (err) =>
-                if err
-                    log.error "Error during binding socket: " + err
-                    return
-                zmqAddress = socket.getsockopt zmq.ZMQ_LAST_ENDPOINT
-                log.info "Listening (" + svcType + ") on", zmqAddress
-                endpoint =
-                    Endpoints: [
-                        Name: name
-                        SvcType: svcType
-                        Connections: [
-                            Type: zmqType
-                            Address: [
-                                zmqAddress
-                            ]
+            zmqAddress = socket.getsockopt zmq.ZMQ_LAST_ENDPOINT
+            log.info "Listening (" + svcType + ") on", zmqAddress
+            endpoint =
+                Endpoints: [
+                    Name: name
+                    SvcType: svcType
+                    Connections: [
+                        Type: zmqType
+                        Address: [
+                            zmqAddress
                         ]
                     ]
-                @handler.send endpoint
+                ]
+            @handler.send endpoint
 
         if @IP?
             log.info "Our IP:", @IP
