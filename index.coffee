@@ -35,9 +35,13 @@ class VirtDBConnector
     @close: =>
         @handler?.close()
         @IP = null
+        for endpoint_name of @Sockets
+            for service_type of @Sockets[endpoint_name]
+                @Sockets[endpoint_name][service_type].close()
         @Sockets = {}
         @handler = new EndpointHandler()
         @callbacks = []
+        Protocol?.close()
         @PubSubCallbacks = null
 
     @onAddress: (service_type, connection_type, callback) =>

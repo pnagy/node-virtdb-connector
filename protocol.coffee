@@ -31,6 +31,7 @@ class Protocol
 
     @close: () =>
         @diag_socket?.close()
+        @diag_socket = null
         @diagAddress = null
 
 

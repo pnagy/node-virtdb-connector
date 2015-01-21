@@ -46,17 +46,21 @@ describe "VirtDBConnector", ->
     sandbox = null
     req_socket = null
     sub_socket = null
+    push_socket = null
     udp_socket = null
 
     beforeEach =>
         sandbox = sinon.sandbox.create()
         req_socket = new SocketStub
         sub_socket = new SocketStub
+        push_socket = new SocketStub
         connectStub = sandbox.stub zmq, "socket", (type) =>
             if type is 'req'
                 return req_socket
             if type is 'sub'
                 return sub_socket
+            if type is 'push'
+                return push_socket
             else
                 return null
         udp_socket = new UDPSocketStub
@@ -78,6 +82,46 @@ describe "VirtDBConnector", ->
             ]
         endpointSerialized = proto_service_config.serialize endpoint ,'virtdb.interface.pb.Endpoint'
         req_socket.send.should.have.been.calledWith endpointSerialized
+
+    it "should close all open sockets on closing", ->
+        NAME = "node-connector-test"
+        cb = sandbox.spy()
+        VirtDBConnector.subscribe 'META_DATA', cb
+        VirtDBConnector.connect NAME, "localhost"
+        message =
+            Endpoints: [
+                Name: "diag-service"
+                SvcType: 'LOG_RECORD'
+                Connections: [
+                    Type: "PUSH_PULL"
+                    Address: [
+                        "tcp://127.0.0.1:12347"
+                    ]
+                ]
+        ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+
+        message =
+            Endpoints: [
+                Name: "fictional-provider"
+                SvcType: 'META_DATA'
+                Connections: [
+                    Type: "PUB_SUB"
+                    Address: [
+                        "tcp://127.0.0.1:12348"
+                    ]
+                ]
+        ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+        VirtDBConnector.close()
+        req_socket.close.should.have.been.called
+        sub_socket.connect.should.have.been.called
+        sub_socket.close.should.have.been.called
+        push_socket.connect.should.have.been.called
+        push_socket.close.should.have.been.called
+
 
     it "should set the name of the component to the log", ->
         NAME = "node-connector-test"
