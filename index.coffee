@@ -54,9 +54,9 @@ class VirtDBConnector
         @handler.on service_type, 'PUB_SUB', (name, addresses) =>
             socket = @Sockets?[name]?[service_type]
             socket ?= zmq.socket 'sub'
-            socket.on "message", (message) =>
+            socket.on "message", (channel, message) =>
                 for callback in @PubSubCallbacks[service_type]
-                    callback message
+                    callback channel, message
             for address in addresses
                 socket.connect address
             channel ?= ""
