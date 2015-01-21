@@ -249,9 +249,9 @@ describe "VirtDBConnector", ->
         messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
         req_socket.callback(messageSerialized)
         sub_socket.subscribe.should.have.been.calledWith('')
-        sub_socket.callback('message')
-        cb1.should.have.been.calledWith('message')
-        cb2.should.have.been.calledWith('message')
+        sub_socket.callback('channelid', 'message')
+        cb1.should.have.been.calledWith('channelid', 'message')
+        cb2.should.have.been.calledWith('channelid', 'message')
 
     it "should be able to be closed without connecting", ->
         VirtDBConnector.close.should.not.throw
