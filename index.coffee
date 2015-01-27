@@ -8,7 +8,7 @@ Convert     = require './convert'
 
 class VirtDBConnector
     # types
-    FieldData = require "./fieldData"
+    @FieldData = require "./fieldData"
 
     # members
 
