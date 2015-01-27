@@ -7,6 +7,11 @@ Constants   = require './constants'
 Convert     = require './convert'
 
 class VirtDBConnector
+    # types
+    FieldData = require "./fieldData"
+
+    # members
+
     @IP: null
     @log = log
     @Constants = Constants
