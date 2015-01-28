@@ -208,6 +208,93 @@ describe "VirtDBConnector", ->
         cb1.should.have.been.called
         cb2.should.have.been.called
 
+    it "should call the callback handlers registered for all socket type when a given endpoint is received on req_rep socket", ->
+        cb1 = sandbox.spy()
+        NAME = "node-connector-test"
+        VirtDBConnector.onAddress VirtDBConnector.ALL_TYPE, 'PUSH_PULL', cb1
+        VirtDBConnector.connect NAME, "localhost"
+        message =
+            Endpoints: [
+                Name: "test1"
+                SvcType: 'QUERY'
+                Connections: [
+                    Type: "PUSH_PULL"
+                    Address: [
+                        "tcp://127.0.0.1:12345"
+                    ]
+                ]
+            ,
+                Name: "test2"
+                SvcType: 'LOG_RECORD'
+                Connections: [
+                    Type: "PUSH_PULL"
+                    Address: [
+                        "tcp://127.0.0.1:134343445"
+                    ]
+                ]
+            ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+        cb1.should.have.been.calledTwice
+
+    it "should call the callback handlers registered for all connection type when a given endpoint is received on req_rep socket", ->
+        cb1 = sandbox.spy()
+        NAME = "node-connector-test"
+        VirtDBConnector.onAddress 'QUERY', VirtDBConnector.ALL_TYPE, cb1
+        VirtDBConnector.connect NAME, "localhost"
+        message =
+            Endpoints: [
+                Name: "test1"
+                SvcType: 'QUERY'
+                Connections: [
+                    Type: "PUSH_PULL"
+                    Address: [
+                        "tcp://127.0.0.1:12345"
+                    ]
+                ]
+            ,
+                Name: "test2"
+                SvcType: 'QUERY'
+                Connections: [
+                    Type: "REQ_REP"
+                    Address: [
+                        "tcp://127.0.0.1:657575"
+                    ]
+                ]
+            ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+        cb1.should.have.been.calledTwice
+
+    it "should call the callback handlers registered for all endpoint when a given endpoint is received on req_rep socket", ->
+        cb1 = sandbox.spy()
+        NAME = "node-connector-test"
+        VirtDBConnector.onAddress VirtDBConnector.ALL_TYPE, VirtDBConnector.ALL_TYPE, cb1
+        VirtDBConnector.connect NAME, "localhost"
+        message =
+            Endpoints: [
+                Name: "test1"
+                SvcType: 'QUERY'
+                Connections: [
+                    Type: "PUSH_PULL"
+                    Address: [
+                        "tcp://127.0.0.1:12345"
+                    ]
+                ]
+            ,
+                Name: "test2"
+                SvcType: 'LOG_RECORD'
+                Connections: [
+                    Type: "REQ_REP"
+                    Address: [
+                        "tcp://127.0.0.1:657575"
+                    ]
+                ]
+            ]
+        messageSerialized = proto_service_config.serialize message, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(messageSerialized)
+        cb1.should.have.been.calledTwice
+
     it "should not call the registered callback handler when a different endpoint is received on req_rep socket", ->
         cb = sandbox.spy()
         NAME = "node-connector-test"

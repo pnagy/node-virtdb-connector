@@ -12,6 +12,7 @@ class VirtDBConnector
 
     # members
 
+    @ALL_TYPE = EndpointHandler.ALL_TYPE
     @IP: null
     @log = log
     @Constants = Constants
@@ -20,6 +21,7 @@ class VirtDBConnector
     @handler = new EndpointHandler()
     @callbacks = []
     @PubSubCallbacks = null
+
 
     @connect: (name, connectionString) =>
         @handler.on 'IP_DISCOVERY', 'RAW_UDP', (name, addresses) =>
