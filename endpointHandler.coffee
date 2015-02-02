@@ -37,7 +37,7 @@ class EndpointHandler
         if endpoint.Connections?
             for connection in endpoint.Connections
                 for handler in @_getMatchingHandlers endpoint.SvcType, connection.Type
-                    handler endpoint.Name, connection.Address
+                    handler endpoint.Name, connection.Address, endpoint.SvcType, connection.Type
 
     _getMatchingHandlers: (svcType, connectionType) =>
         handlers = []
