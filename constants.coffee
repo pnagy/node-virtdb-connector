@@ -30,5 +30,7 @@ class Constants
 
     @SERVER_CONFIG_TYPE = "42"
 
+    @CONFIG_SERVICE = "config-service"
+    @DIAG_SERVICE = "diag-service"
 
 module.exports = Constants
