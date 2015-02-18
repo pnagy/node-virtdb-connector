@@ -343,3 +343,43 @@ describe "VirtDBConnector", ->
     it "should be able to be closed without connecting", ->
         VirtDBConnector.close.should.not.throw
         VirtDBConnector.close()
+
+    it "should call the registered callback handlers when a given endpoint is received on pub_sub socket", ->
+        NAME = "node-connector-test"
+        cb = sandbox.spy()
+        VirtDBConnector.onAddress 'QUERY', 'PUSH_PULL', cb
+        VirtDBConnector.connect NAME, "localhost"
+        endointsSubMsg =
+            Endpoints: [
+                Name: "cfgSvcTest"
+                SvcType: 'ENDPOINT'
+                Connections: [
+                    Type: "PUB_SUB"
+                    Address: [
+                        "tcp://127.0.089.1:12345"
+                    ]
+                ]
+        ]
+        newEndpoint =
+            Endpoints: [
+                Name: "newpublishedtest"
+                SvcType: 'QUERY'
+                Connections: [
+                    Type: "PUSH_PULL"
+                    Address: [
+                        "tcp://127.78.89.1:12345"
+                    ]
+                ]
+        ]
+        endointsSubMsgSerialized = proto_service_config.serialize endointsSubMsg, 'virtdb.interface.pb.Endpoint'
+        newEndpointSerialized = proto_service_config.serialize newEndpoint, 'virtdb.interface.pb.Endpoint'
+        req_socket.callback(endointsSubMsgSerialized)
+        sub_socket.callback(newEndpointSerialized)
+        sub_socket.subscribe.should.have.been.called
+        cb.should.have.been.called
+
+    it "should subscribe for endpoints", ->
+        NAME = "node-connector-test"
+        subSpy = sandbox.stub VirtDBConnector, "subscribe"
+        VirtDBConnector.connect NAME, "localhost"
+        subSpy.should.have.been.calledWith "ENDPOINT"
