@@ -374,7 +374,7 @@ describe "VirtDBConnector", ->
         endointsSubMsgSerialized = proto_service_config.serialize endointsSubMsg, 'virtdb.interface.pb.Endpoint'
         newEndpointSerialized = proto_service_config.serialize newEndpoint, 'virtdb.interface.pb.Endpoint'
         req_socket.callback(endointsSubMsgSerialized)
-        sub_socket.callback(newEndpointSerialized)
+        sub_socket.callback('channelid', newEndpointSerialized)
         sub_socket.subscribe.should.have.been.called
         cb.should.have.been.called
 

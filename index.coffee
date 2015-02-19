@@ -28,7 +28,7 @@ class VirtDBConnector
             @_findMyIP addresses[0] # TODO should we handle more addresses here?
         @handler.on 'LOG_RECORD', 'PUSH_PULL', (name, addresses) =>
             Protocol.connectToDiag addresses
-        @subscribe 'ENDPOINT', @handler.onEndpointMessage
+        @subscribe 'ENDPOINT', @handler.onPublishedEndpointMessage
         @handler.connect connectionString
         log.setComponentName name
 
