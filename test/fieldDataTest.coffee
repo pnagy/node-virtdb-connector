@@ -7,6 +7,44 @@ sinonChai = require "sinon-chai"
 chai.use sinonChai
 
 describe "FieldData", ->
+    it "should give back the data as an array if there are some null value", ->
+        input =
+            Name: 'startingPos',
+            Data: 
+                Type: 'UINT32'
+                StringValue: []
+                Int32Value: []
+                Int64Value: []
+                UInt32Value: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 1, 2 ],
+                UInt64Value: []
+                DoubleValue: []
+                FloatValue: []
+                BoolValue: []
+                BytesValue: []
+                IsNull: [ false, false, false, false, false, false, false, false, false, true, true, false, false ]
+        expected = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, null, null, 1, 2]
+        result = FieldData.get(input)
+        result.should.deep.equal expected
+
+    it "should give back the data as an array if there are no null values", ->
+        input =
+            Name: 'startingPos',
+            Data: 
+                Type: 'STRING'
+                StringValue: [ 'AL','SL','XL','AL','AL','GL','AL','AL','FL','PL']
+                Int32Value: []
+                Int64Value: []
+                UInt32Value: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 1, 2 ],
+                UInt64Value: []
+                DoubleValue: []
+                FloatValue: []
+                BoolValue: []
+                BytesValue: []
+                IsNull: [ false, false, false, false, false, false, false, false, false, false, false, false, false ]
+        expected = [ 'AL','SL','XL','AL','AL','GL','AL','AL','FL','PL']
+        result = FieldData.get(input)
+        result.should.deep.equal expected
+
     it "createInstance should create the appropriate type", ->
         type = 'STRING'
         field = FieldData.createInstance "fieldName", type

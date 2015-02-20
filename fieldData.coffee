@@ -29,7 +29,7 @@ class FieldData
 
     @get: (data) =>
         local = @createInstance data.Data.Name, data.Data.Type
-        local.pushArray data.Data
+        local.pushValueType data.Data
         return local.getArray()
 
     constructor: (@FieldName, @Type) ->
@@ -101,7 +101,6 @@ class Int32FieldData extends FieldData
             @Int32Value[index]
         else
             null
-
 
 class Int64FieldData extends FieldData
     constructor: (fieldName, type) ->
