@@ -4,25 +4,25 @@ class FieldData
     @createInstance: (type) ->
         switch type
             when "STRING"
-                new StringFieldData()
+                new StringFieldData(type)
             when "INT32"
-                new Int32FieldData()
+                new Int32FieldData(type)
             when "INT64"
-                new Int64FieldData()
+                new Int64FieldData(type)
             when "UINT32"
-                new UInt32FieldData()
+                new UInt32FieldData(type)
             when "UINT64"
-                new UInt64FieldData()
+                new UInt64FieldData(type)
             when "DOUBLE"
-                new DoubleFieldData()
+                new DoubleFieldData(type)
             when "FLOAT"
-                new FloatFieldData()
+                new FloatFieldData(type)
             when "BOOL"
-                new BoolFieldData()
+                new BoolFieldData(type)
             when "BYTES"
-                new BytesFieldData()
+                new BytesFieldData(type)
             else # "DATE", "TIME", "DATETIME", "NUMERIC", "INET4", "INET6", "MAC", "GEODATA"
-                new StringFieldData()
+                new StringFieldData(type)
 
     @createInstanceFromField: (field) ->
         @createInstance field.Desc.Type
@@ -32,7 +32,7 @@ class FieldData
         local.pushValueType data.Data
         return local.getArray()
 
-    constructor: () ->
+    constructor: (@Type) ->
         @length = 0
         @IsNull = new Array()
 
@@ -46,8 +46,8 @@ class FieldData
 
 
 class StringFieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @StringValue = new Array()
 
     push: (value) =>
@@ -72,8 +72,8 @@ class StringFieldData extends FieldData
 
 
 class Int32FieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @Int32Value = new Array()
 
     push: (value) =>
@@ -103,8 +103,8 @@ class Int32FieldData extends FieldData
             null
 
 class Int64FieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @Int64Value = new Array()
 
     push: (value) =>
@@ -135,8 +135,8 @@ class Int64FieldData extends FieldData
 
 
 class UInt32FieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @UInt32Value = new Array()
 
     push: (value) =>
@@ -167,8 +167,8 @@ class UInt32FieldData extends FieldData
 
 
 class UInt64FieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @UInt64Value = new Array()
 
     push: (value) =>
@@ -199,8 +199,8 @@ class UInt64FieldData extends FieldData
 
 
 class DoubleFieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @DoubleValue = new Array()
 
     push: (value) =>
@@ -231,8 +231,8 @@ class DoubleFieldData extends FieldData
 
 
 class FloatFieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @FloatValue = new Array()
 
     push: (value) =>
@@ -263,8 +263,8 @@ class FloatFieldData extends FieldData
 
 
 class BoolFieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @BoolValue = new Array()
 
     push: (value) =>
@@ -292,8 +292,8 @@ class BoolFieldData extends FieldData
             null
 
 class BytesFieldData extends FieldData
-    constructor: () ->
-        super
+    constructor: (type) ->
+        super type
         @BytesValue = new Array()
 
     push: (value) =>
