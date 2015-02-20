@@ -7,61 +7,88 @@ sinonChai = require "sinon-chai"
 chai.use sinonChai
 
 describe "FieldData", ->
+    it "should give back the data as an array if there are some null value", ->
+        input =
+            Name: 'startingPos',
+            Data: 
+                Type: 'UINT32'
+                StringValue: []
+                Int32Value: []
+                Int64Value: []
+                UInt32Value: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 1, 2 ],
+                UInt64Value: []
+                DoubleValue: []
+                FloatValue: []
+                BoolValue: []
+                BytesValue: []
+                IsNull: [ false, false, false, false, false, false, false, false, false, true, true, false, false ]
+        expected = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, null, null, 1, 2]
+        result = FieldData.get input
+        result.should.deep.equal expected
+
+    it "should give back the data as an array if there are no null values", ->
+        input =
+            Name: 'startingPos',
+            Data: 
+                Type: 'STRING'
+                StringValue: [ 'AL','SL','XL','AL','AL','GL','AL','AL','FL','PL']
+                Int32Value: []
+                Int64Value: []
+                UInt32Value: [],
+                UInt64Value: []
+                DoubleValue: []
+                FloatValue: []
+                BoolValue: []
+                BytesValue: []
+                IsNull: [ false, false, false, false, false, false, false, false, false, false, false, false, false ]
+        expected = [ 'AL','SL','XL','AL','AL','GL','AL','AL','FL','PL']
+        result = FieldData.get input
+        result.should.deep.equal expected
+
     it "createInstance should create the appropriate type", ->
         type = 'STRING'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.StringValue.should.deep.equal []
+        
         type = 'INT32'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.Int32Value.should.deep.equal []
+    
         type = 'INT64'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.Int64Value.should.deep.equal []
+        
         type = 'UINT32'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.UInt32Value.should.deep.equal []
+        
         type = 'UINT64'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.UInt64Value.should.deep.equal []
+        
         type = 'DOUBLE'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.DoubleValue.should.deep.equal []
+        
         type = 'FLOAT'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.FloatValue.should.deep.equal []
+        
         type = 'BOOL'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.BoolValue.should.deep.equal []
+        
         type = 'BYTES'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.BytesValue.should.deep.equal []
+        
         type = 'DATE'
-        field = FieldData.createInstance "fieldName", type
-        field.FieldName.should.equal 'fieldName'
-        field.Type.should.equal type
+        field = FieldData.createInstance type
         field.StringValue.should.deep.equal []
 
 describe "StringFieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'STRING'
+        field = FieldData.createInstance 'STRING'
         field.push "cica"
         field.push "kutya"
         field.get(0).should.equal "cica"
@@ -70,7 +97,7 @@ describe "StringFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'STRING'
+        field = FieldData.createInstance 'STRING'
         field.pushArray ["cica", "kutya"]
         field.get(0).should.equal "cica"
         field.get(1).should.equal "kutya"
@@ -78,7 +105,7 @@ describe "StringFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'STRING'
+        field = FieldData.createInstance 'STRING'
         valueType =
             Type: 'STRING'
             StringValue: ["cica", "kutya", ""]
@@ -92,7 +119,7 @@ describe "StringFieldData", ->
 
 describe "Int32FieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'INT32'
+        field = FieldData.createInstance 'INT32'
         field.push 5
         field.push -2
         field.get(0).should.equal 5
@@ -101,7 +128,7 @@ describe "Int32FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'INT32'
+        field = FieldData.createInstance 'INT32'
         field.pushArray [5, -2]
         field.get(0).should.equal 5
         field.get(1).should.equal -2
@@ -109,7 +136,7 @@ describe "Int32FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'INT32'
+        field = FieldData.createInstance 'INT32'
         valueType =
             Type: 'INT32'
             Int32Value: [5, -2, ""]
@@ -123,7 +150,7 @@ describe "Int32FieldData", ->
 
 describe "Int64FieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'INT64'
+        field = FieldData.createInstance 'INT64'
         field.push 5
         field.push -2
         field.get(0).should.equal 5
@@ -132,7 +159,7 @@ describe "Int64FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'INT64'
+        field = FieldData.createInstance 'INT64'
         field.pushArray [5, -2]
         field.get(0).should.equal 5
         field.get(1).should.equal -2
@@ -140,7 +167,7 @@ describe "Int64FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'INT64'
+        field = FieldData.createInstance 'INT64'
         valueType =
             Type: 'INT64'
             Int64Value: [5, -2, ""]
@@ -154,7 +181,7 @@ describe "Int64FieldData", ->
 
 describe "UInt32FieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'UINT32'
+        field = FieldData.createInstance 'UINT32'
         field.push 5
         field.push 2
         field.get(0).should.equal 5
@@ -163,7 +190,7 @@ describe "UInt32FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'UINT32'
+        field = FieldData.createInstance 'UINT32'
         field.pushArray [5, -2]
         field.get(0).should.equal 5
         should.not.exist field.get(1)
@@ -171,7 +198,7 @@ describe "UInt32FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'UINT32'
+        field = FieldData.createInstance 'UINT32'
         valueType =
             Type: 'UINT32'
             UInt32Value: [5, 2, ""]
@@ -185,7 +212,7 @@ describe "UInt32FieldData", ->
 
 describe "UInt64FieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'UINT64'
+        field = FieldData.createInstance 'UINT64'
         field.push 5
         field.push 2
         field.get(0).should.equal 5
@@ -194,7 +221,7 @@ describe "UInt64FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'UINT64'
+        field = FieldData.createInstance 'UINT64'
         field.pushArray [5, -2]
         field.get(0).should.equal 5
         should.not.exist field.get(1)
@@ -202,7 +229,7 @@ describe "UInt64FieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'UINT64'
+        field = FieldData.createInstance 'UINT64'
         valueType =
             Type: 'UINT64'
             UInt64Value: [5, 2, ""]
@@ -216,7 +243,7 @@ describe "UInt64FieldData", ->
 
 describe "DoubleFieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'DOUBLE'
+        field = FieldData.createInstance 'DOUBLE'
         field.push 5.1
         field.push 2.23223232
         field.get(0).should.equal 5.1
@@ -225,7 +252,7 @@ describe "DoubleFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'DOUBLE'
+        field = FieldData.createInstance 'DOUBLE'
         field.pushArray [5, -2]
         field.get(0).should.equal 5
         field.get(1).should.equal -2
@@ -233,7 +260,7 @@ describe "DoubleFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'DOUBLE'
+        field = FieldData.createInstance 'DOUBLE'
         valueType =
             Type: 'DOUBLE'
             DoubleValue: [5.1, -2.14, ""]
@@ -247,7 +274,7 @@ describe "DoubleFieldData", ->
 
 describe "FloatFieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'FLOAT'
+        field = FieldData.createInstance 'FLOAT'
         field.push 5.1
         field.push 2.23223232
         field.get(0).should.equal 5.1
@@ -256,7 +283,7 @@ describe "FloatFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'FLOAT'
+        field = FieldData.createInstance 'FLOAT'
         field.pushArray [5, -2]
         field.get(0).should.equal 5
         field.get(1).should.equal -2
@@ -264,7 +291,7 @@ describe "FloatFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'FLOAT'
+        field = FieldData.createInstance 'FLOAT'
         valueType =
             Type: 'FLOAT'
             FloatValue: [5.1, -2.14, ""]
@@ -278,7 +305,7 @@ describe "FloatFieldData", ->
 
 describe "BoolFieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'BOOL'
+        field = FieldData.createInstance 'BOOL'
         field.push true
         field.push 'truee'
         field.get(0).should.equal true
@@ -287,7 +314,7 @@ describe "BoolFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'BOOL'
+        field = FieldData.createInstance 'BOOL'
         field.pushArray [false, true]
         field.get(0).should.equal false
         field.get(1).should.equal true
@@ -295,7 +322,7 @@ describe "BoolFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'BOOL'
+        field = FieldData.createInstance 'BOOL'
         valueType =
             Type: 'BOOL'
             BoolValue: [true, false, ""]
@@ -309,7 +336,7 @@ describe "BoolFieldData", ->
 
 describe "BytesFieldData", ->
     it "should give back values pushed", ->
-        field = FieldData.createInstance "fieldName", 'BYTES'
+        field = FieldData.createInstance 'BYTES'
         field.push [2,34,4,123]
         field.push [266]
         field.get(0).should.deep.equal [2,34,4,123]
@@ -318,7 +345,7 @@ describe "BytesFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as array", ->
-        field = FieldData.createInstance "fieldName", 'BYTES'
+        field = FieldData.createInstance 'BYTES'
         field.pushArray [[2,34,4,123], [6]]
         field.get(0).should.deep.equal [2,34,4,123]
         field.get(1).should.deep.equal [6]
@@ -326,7 +353,7 @@ describe "BytesFieldData", ->
         field.length.should.equal 2
 
     it "should give back values pushed as well-formed ValueType", ->
-        field = FieldData.createInstance "fieldName", 'BYTES'
+        field = FieldData.createInstance 'BYTES'
         valueType =
             Type: 'BYTES'
             BytesValue: [[2,34,4,123], [43, 34], ""]
